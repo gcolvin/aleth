@@ -10,6 +10,8 @@ set(
     VMCalls.cpp
     VMConfig.h
     VMOpt.cpp
+    VMSIMD.cpp
+    VMValidate.cpp
 )
 add_library(aleth-interpreter STATIC ${sources})
 target_link_libraries(aleth-interpreter PRIVATE devcore aleth-buildinfo evmc::evmc evmc::instructions)
