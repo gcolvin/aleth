@@ -351,14 +351,30 @@ void VM::xmstore(uint8_t _type)
 
 void VM::xsload(uint8_t _type)
 {
-	u256 w = m_ext->store(m_SP[0]);
+	evmc_uint256be key = toEvmC(m_SP[0]);
+	u256 w = fromEvmC(m_context->host->get_storage(m_context, &m_message->destination, &key));
 	wtov(_type, w, m_SPP[0]);
 }
 
 void VM::xsstore(uint8_t _type)
 {
-	u256 w = vtow(_type, m_SP[1]);
-	m_ext->setStore(m_SP[0], w);
+	evmc_uint256be const key = toEvmC(m_SP[0]);
+	evmc_uint256be const value = toEvmC(vtow(_type, m_SP[1]));
+	auto const status =
+		m_context->host->set_storage(m_context, &m_message->destination, &key, &value);
+
+	if (status == EVMC_STORAGE_ADDED)
+		m_runGas = VMSchedule::sstoreSetGas;
+	else if (status == EVMC_STORAGE_MODIFIED || status == EVMC_STORAGE_DELETED)
+		m_runGas = VMSchedule::sstoreResetGas;
+	else if (status == EVMC_STORAGE_UNCHANGED && m_rev < EVMC_CONSTANTINOPLE)
+		m_runGas = VMSchedule::sstoreResetGas;
+	else
+	{
+		assert(status == EVMC_STORAGE_UNCHANGED || status == EVMC_STORAGE_MODIFIED_AGAIN);
+		assert(m_rev >= EVMC_CONSTANTINOPLE);
+		m_runGas = VMSchedule::sstoreUnchangedGas;
+	}
 }
 
 void VM::xvtowide(uint8_t _type)
@@ -461,6 +477,7 @@ void VM::xget(uint8_t _srcType, uint8_t _idxType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	case Bits16:
 
@@ -485,6 +502,7 @@ void VM::xget(uint8_t _srcType, uint8_t _idxType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	case Bits32:
 
@@ -509,6 +527,7 @@ void VM::xget(uint8_t _srcType, uint8_t _idxType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	case Bits64:
 
@@ -533,6 +552,7 @@ void VM::xget(uint8_t _srcType, uint8_t _idxType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	default:
 		throwBadInstruction();
@@ -572,6 +592,7 @@ void VM::xput(uint8_t _srcType, uint8_t _dstType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	case Bits16:
 
@@ -596,6 +617,7 @@ void VM::xput(uint8_t _srcType, uint8_t _dstType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	case Bits32:
 
@@ -620,6 +642,7 @@ void VM::xput(uint8_t _srcType, uint8_t _dstType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	case Bits64:
 
@@ -644,6 +667,7 @@ void VM::xput(uint8_t _srcType, uint8_t _dstType)
 		default:
 			throwBadInstruction();
 		}
+		break;
 
 	default:
 		throwBadInstruction();

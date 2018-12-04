@@ -36,9 +36,9 @@ namespace eth
 // invalid code will throw an exception
 //
 
-void VM::validate(ExtVMFace& _ext)
+void VM::validate(evmc_context* _context)
 {
-	m_ext = &_ext;
+	m_context = _context;
 	initEntry();
 	size_t PC;
 	Instruction OP;

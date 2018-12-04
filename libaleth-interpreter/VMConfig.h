@@ -39,11 +39,11 @@ namespace eth
 // EVM_TRACE              - provides various levels of tracing
 
 #ifndef EIP_615
-#define EIP_615 false
+#define EIP_615 true
 #endif
 
 #ifndef EIP_616
-#define EIP_616 false
+#define EIP_616 true
 #endif
 
 #ifndef EVM_JUMP_DISPATCH

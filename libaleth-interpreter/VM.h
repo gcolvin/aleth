@@ -70,7 +70,7 @@ public:
 
 #if EIP_615
     // invalid code will throw an exeption
-    void validate(ExtVMFace& _ext);
+	void validate(evmc_context* _context);
     void validateSubroutine(uint64_t _PC, uint64_t* _rp, u256* _sp);
 #endif
 

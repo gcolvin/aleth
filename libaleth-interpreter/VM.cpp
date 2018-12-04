@@ -1153,7 +1153,7 @@ void VM::interpretCases()
 
         CASE(XSLOAD)
         {
-            m_runGas = toInt63(m_schedule->sloadGas);
+            m_runGas = toInt63(VMSchedule::sloadGas);
             ON_OP();
             updateIOGas();
 
@@ -1163,14 +1163,12 @@ void VM::interpretCases()
 
         CASE(XSSTORE)
         {
-            if (m_ext->staticCall)
+            if (m_message->flags & EVMC_STATIC)
                 throwDisallowedStateChange();
 
-            updateSSGas();
             ON_OP();
-            updateIOGas();
-
             xsstore(simdType());
+            updateIOGas();
         }
         CONTINUE
 
